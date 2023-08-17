@@ -63,9 +63,9 @@ impl ToTokens for Model {
         let columns = &self.get_columns();
         let constraints = &self.get_constraints();
         let template = quote! {
-          impl ::models::private::Model for #name {
-            fn target() -> ::models::private::Table {
-                let mut __models_table = ::models::private::Table::new(stringify!(#name_lowercase));
+          impl ::sql_from_models::private::Model for #name {
+            fn target() -> ::sql_from_models::private::Table {
+                let mut __models_table = ::sql_from_models::private::Table::new(stringify!(#name_lowercase));
                 #columns
                 #constraints
                 __models_table

@@ -36,7 +36,7 @@ impl ForeignKey {
             .unwrap_or_default();
         quote! {
             __models_table.constraints.push(
-                ::models::private::constraint::foreign_key(
+                ::sql_from_models::private::constraint::foreign_key(
                     #constr_name,
                     stringify!(#local_col),
                     stringify!(#foreign_table),
@@ -66,7 +66,7 @@ impl Unique {
 
         quote! {
             __models_table.constraints.push(
-                ::models::private::constraint::#method(
+                ::sql_from_models::private::constraint::#method(
                     #constr_name,
                     &[stringify!(#field_name), #(stringify!(#columns)),*]
                 )

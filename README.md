@@ -9,7 +9,7 @@ Sql migrations from your rust code.
 
 install the CLI by running the following command: 
 ```
-$ cargo install models-cli
+$ cargo install sql_from_models-cli
 ```
 
 Now run the following command to create an environment file with the `DATABASE_URL` variable set: 

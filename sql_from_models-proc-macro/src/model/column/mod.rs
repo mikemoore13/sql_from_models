@@ -17,20 +17,20 @@ impl ToTokens for Column {
         let temp = if let Some(default) = default {
             quote! {
                 __models_table.columns.push(
-                    ::models::private::Column::new_with_default(
+                    ::sql_from_models::private::Column::new_with_default(
                         stringify!(#col_name),
-                        <#ty as ::models::types::IntoSQL>::into_sql(),
-                        <#ty as ::models::types::IntoSQL>::IS_NULLABLE,
+                        <#ty as ::sql_from_models::types::IntoSQL>::into_sql(),
+                        <#ty as ::sql_from_models::types::IntoSQL>::IS_NULLABLE,
                         #default
                 ));
             }
         } else {
             quote! {
                 __models_table.columns.push(
-                    ::models::private::Column::new(
+                    ::sql_from_models::private::Column::new(
                         stringify!(#col_name),
-                        <#ty as ::models::types::IntoSQL>::into_sql(),
-                        <#ty as ::models::types::IntoSQL>::IS_NULLABLE,
+                        <#ty as ::sql_from_models::types::IntoSQL>::into_sql(),
+                        <#ty as ::sql_from_models::types::IntoSQL>::IS_NULLABLE,
                 ));
             }
         };

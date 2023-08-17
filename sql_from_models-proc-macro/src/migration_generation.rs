@@ -22,8 +22,8 @@ fn generate_migration_unchecked(name: &Ident) -> TokenStream2 {
     quote! {
         #[test]
         fn #test_name() {
-            ::models::private::SCHEDULER.register(
-                <#name as ::models::private::Model>::target()
+            ::sql_from_models::private::SCHEDULER.register(
+                <#name as ::sql_from_models::private::Model>::target()
             );
         }
     }
