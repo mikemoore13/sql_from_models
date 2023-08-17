@@ -400,7 +400,6 @@ define_keywords!(
     SEQUENCEFILE,
     SERDE,
     SERIAL,
-    BIGSERIAL,
     SERIALIZABLE,
     SESSION,
     SESSION_USER,
@@ -498,7 +497,8 @@ define_keywords!(
     WORK,
     WRITE,
     YEAR,
-    ZONE
+    ZONE,
+    BIGSERIAL
 );
 
 /// These keywords can't be used as a table alias, so that `FROM table_name alias`

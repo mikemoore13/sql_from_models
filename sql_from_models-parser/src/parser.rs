@@ -2079,6 +2079,7 @@ impl<'a> Parser<'a> {
                 }
                 Keyword::JSON => Ok(DataType::Json),
                 Keyword::SERIAL => Ok(DataType::Serial),
+                Keyword::BIGSERIAL => Ok(DataType::BigSerial),
                 Keyword::BYTEA => Ok(DataType::Bytea),
                 Keyword::NUMERIC | Keyword::DECIMAL | Keyword::DEC => {
                     let (precision, scale) = self.parse_optional_precision_scale()?;
