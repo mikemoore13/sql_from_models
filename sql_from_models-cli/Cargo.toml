@@ -13,6 +13,7 @@ default-run = "sql_from_models"
 authors = [
     "Jesper Axelsson <jesperaxe@gmail.com>",
     "Austin Bonander <austin.bonander@gmail.com>",
+    "higneer <contact@higneer.ovh>"
 ]
 
 [[bin]]

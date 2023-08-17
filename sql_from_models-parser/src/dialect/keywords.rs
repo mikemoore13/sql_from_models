@@ -400,6 +400,7 @@ define_keywords!(
     SEQUENCEFILE,
     SERDE,
     SERIAL,
+    BIGSERIAL,
     SERIALIZABLE,
     SESSION,
     SESSION_USER,

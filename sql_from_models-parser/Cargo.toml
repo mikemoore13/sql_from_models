@@ -2,7 +2,9 @@
 name = "sql_from_models-parser"
 description = "Helper crate for models"
 version = "0.2.0"
-authors = ["Andy Grove <andygrove73@gmail.com>"]
+authors = [
+    "Andy Grove <andygrove73@gmail.com>",
+    "higneer <contact@higneer.ovh>"]
 repository = "https://github.com/tvallotton/sqlx-models"
 license = "Apache-2.0"
 edition = "2018"

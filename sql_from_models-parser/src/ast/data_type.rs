@@ -79,12 +79,15 @@ pub enum DataType {
     Json,
     /// Serial PostgeSQL type
     Serial,
+    /// Serial PostgeSQL type
+    BigSerial,
 }
 
 impl fmt::Display for DataType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             DataType::Serial => write!(f, "SERIAL"),
+            DataType::BigSerial => write!(f, "BIGSERIAL"),
             DataType::Json => write!(f, "JSON"),
             DataType::Char(size) => format_type_with_optional_length(f, "CHAR", size),
             DataType::Varchar(size) => format_type_with_optional_length(f, "VARCHAR", size),

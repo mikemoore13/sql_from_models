@@ -37,11 +37,13 @@ mod serial;
 mod time;
 mod var_binary;
 mod var_char;
+mod big_serial;
 
 #[cfg(feature = "json")]
 pub use json::*;
 use sql_from_models_parser::ast::DataType;
 pub use serial::Serial;
+pub use big_serial::BigSerial;
 pub use time::*;
 pub use var_binary::VarBinary;
 pub use var_char::VarChar;

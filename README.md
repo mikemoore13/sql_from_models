@@ -1,5 +1,8 @@
-# Models
+# sql_from_models
+sql_from_models is a fork of Models with big serial support.
 Models is a SQL migration management tool. It supports PostgreSQL, MySQL, and SQLite.
+It is designed to be used as a library in your application, but it also includes a CLI tool to generate
+Sql migrations from your rust code.
 
 
 # Quick Start
