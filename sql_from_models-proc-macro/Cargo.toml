@@ -15,4 +15,4 @@ helpers = []
 proc-macro2 = "1.0.28"
 quote = "1.0.9"
 sql_from_models-parser ={version = "0.2.0", path = "../sql_from_models-parser" }
-syn = "2.0.28"
+syn = "1.0.74"
