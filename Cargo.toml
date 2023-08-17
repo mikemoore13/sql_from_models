@@ -1,8 +1,7 @@
 [workspace]
 
 members = [
-    "models",
-    "models-cli",
-    "models-parser",
-    "models-tests",
+    "sql_from_models",
+    "sql_from_models-cli",
+    "sql_from_models-parser"
 ]
