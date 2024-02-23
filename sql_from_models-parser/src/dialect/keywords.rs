@@ -98,6 +98,7 @@ define_keywords!(
     BEGIN_PARTITION,
     BETWEEN,
     BIGINT,
+    BIGSERIAL,
     BINARY,
     BLOB,
     BOOLEAN,
@@ -497,8 +498,7 @@ define_keywords!(
     WORK,
     WRITE,
     YEAR,
-    ZONE,
-    BIGSERIAL
+    ZONE
 );
 
 /// These keywords can't be used as a table alias, so that `FROM table_name alias`

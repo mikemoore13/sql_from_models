@@ -5,6 +5,7 @@ use std::ops::{Deref, DerefMut};
 
 /// Wrapper type used to hold serilizable data. The type generated is `JSON`.
 /// ```rust
+/// use sql_from_models::Json;
 /// struct Author {
 ///     books: Json<Vec<String>>
 /// }

@@ -176,8 +176,8 @@ impl IntoSQL for bool {
 
 #[test]
 fn func() {
-    let x = &models_parser::parser::Parser::parse_sql(
-        &models_parser::dialect::GenericDialect {},
+    let x = &sql_from_models_parser::parser::Parser::parse_sql(
+        &sql_from_models_parser::dialect::GenericDialect {},
         "
     
     CREATE TABLE Persons (

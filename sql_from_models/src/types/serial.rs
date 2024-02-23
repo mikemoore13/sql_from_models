@@ -9,6 +9,7 @@ use crate::prelude::*;
 /// PostgreSQL `SERIAL` type. It enables autoincrementing functionality. 
 /// Example: 
 /// ```
+/// use sql_from_models::Serial;
 /// struct Profile {
 ///     id: Serial,
 /// }

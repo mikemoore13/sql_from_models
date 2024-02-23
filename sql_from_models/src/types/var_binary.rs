@@ -12,7 +12,7 @@ use serde::*;
 /// a `VARBINARY(N)`. The database will make sure the field does not
 /// go over the specified length.
 /// ```
-/// use sql_from_models::{Model, VarChar};
+/// use sql_from_models::{Model, VarBinary, VarChar};
 /// #[derive(Model)]
 /// struct Example {
 ///     bin_data: VarBinary<255>
