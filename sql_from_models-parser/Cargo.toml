@@ -1,7 +1,7 @@
 [package]
 name = "sql_from_models-parser"
 description = "Helper crate for models"
-version = "0.2.0"
+version = "0.2.1"
 authors = [
     "Andy Grove <andygrove73@gmail.com>",
     "higneer <contact@higneer.ovh>"]

@@ -1,7 +1,7 @@
 use crate::prelude::*; // TODO:
                        //     getters for foreign keys
 
-use super::Model;
+use super::sql_from_models::Model;
 
 struct Getters<'a> {
     model: &'a Model,
@@ -41,7 +41,7 @@ impl<'a> ToTokens for Getter {
                 column_type,
             } => {
                 
-                let query = format!("select * from {} where co;", table_name, column_name);
+                let query = format!("select * from {} where column = {}", table_name, column_name);
                 tokens.extend(quote! {
                     fn #name(&self, val: #dtype) -> ::std::result::Result<Vec<_>, ::sqlx::Error>{
                         ::sqlx::query(#query).
