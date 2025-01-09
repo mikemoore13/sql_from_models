@@ -48,8 +48,9 @@ impl Column {
 
     fn get_default(attrs: Vec<Attribute>) -> Result<Option<DefaultExpr>> {
         for attr in attrs {
-            if attr.path.is_ident("default") {
-                return Ok(Some(syn::parse(attr.tokens.into())?));
+            if attr.path().is_ident("default") {
+                let meta = attr.parse_args()?;
+                return Ok(Some(meta));
             }
         }
         Ok(None)

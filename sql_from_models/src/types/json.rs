@@ -3,7 +3,7 @@ use sql_from_models_parser::ast::DataType;
 use serde::*;
 use std::ops::{Deref, DerefMut};
 
-/// Wrapper type used to hold serilizable data. The type generated is `JSON`.
+/// Wrapper type used to hold serializable data. The type generated is `JSON`.
 /// ```rust
 /// use sql_from_models::Json;
 /// struct Author {
@@ -46,10 +46,10 @@ impl<T> AsMut<T> for Json<T> {
 }
 
 impl<T> IntoSQL for Json<T> {
-    const IS_NULLABLE: bool = false;
     fn into_sql() -> DataType {
         DataType::Json
     }
+    const IS_NULLABLE: bool = false;
 }
 #[allow(unused_imports)]
 #[cfg(feature = "sqlx")]
@@ -57,57 +57,57 @@ mod sqlx_impl {
     use super::*;
     use serde::{Deserialize, Serialize};
     #[cfg(feature = "sqlx-mysql")]
-    use sqlx::sqlite::{Sqlite, SqliteTypeInfo};
-    #[cfg(feature = "sqlx-mysql")]
     use sqlx::mysql::{MySql, MySqlTypeInfo};
+    #[cfg(feature = "sqlx-sqlite")]
+    use sqlx::sqlite::{Sqlite, SqliteTypeInfo};
     #[cfg(feature = "sqlx-postgres")]
     use sqlx::postgres::{PgTypeInfo, Postgres};
     use sqlx::{
-        database::{HasArguments, HasValueRef},
         decode::Decode,
         encode::{Encode, IsNull},
+        types::Json as SqlxJson,
         Database, Type,
     };
-    use std::io::Write;
-    #[cfg(feature = "sqlx-postgres")]
+
+    /// Implement `Type` trait for `Json` to map it to the database's JSON type.
     impl<T, DB> Type<DB> for Json<T>
     where
         DB: Database,
-        sqlx::types::Json<T>: Type<DB>,
+        SqlxJson<T>: Type<DB>,
     {
         fn type_info() -> DB::TypeInfo {
-            sqlx::types::Json::type_info()
+            SqlxJson::<T>::type_info()
         }
 
         fn compatible(ty: &DB::TypeInfo) -> bool {
-            sqlx::types::Json::compatible(ty)
-        }
-    }
-    impl<'q, T, DB> Encode<'q, DB> for Json<T>
-    where
-        DB: Database,
-        T: Serialize,
-        <DB as HasArguments<'q>>::ArgumentBuffer: Write,
-    {
-        fn encode_by_ref(&self, buf: &mut <DB as HasArguments<'q>>::ArgumentBuffer) -> IsNull {
-            serde_json::to_writer(buf, self).ok();
-            IsNull::No
+            SqlxJson::<T>::compatible(ty)
         }
     }
 
+    /// Implement `Encode` for `Json` to allow it to be written to the database.
+    impl<'q, T, DB> Encode<'q, DB> for Json<T>
+    where
+        DB: Database,
+        T: Serialize + Clone,
+        SqlxJson<T>: Encode<'q, DB>,
+    {
+        fn encode_by_ref(&self, buf: &mut <DB as sqlx::Database>::ArgumentBuffer<'q>) -> Result<IsNull, Box<dyn std::error::Error + 'static + Send + Sync>> {
+            <SqlxJson<T> as Encode<'q, DB>>::encode_by_ref(&SqlxJson(self.0.clone()), buf)
+        }
+    }
+
+    /// Implement `Decode` for `Json` to allow it to be read from the database.
     impl<'r, DB, T> Decode<'r, DB> for Json<T>
     where
-        &'r str: Decode<'r, DB>,
         DB: Database,
+        SqlxJson<T>: Decode<'r, DB>,
         T: Deserialize<'r>,
     {
         fn decode(
-            value: <DB as HasValueRef<'r>>::ValueRef,
+            value: <DB as sqlx::Database>::ValueRef<'r>,
         ) -> Result<Json<T>, Box<dyn std::error::Error + 'static + Send + Sync>> {
-            let string_value = <&str as Decode<DB>>::decode(value)?;
-            serde_json::from_str(string_value)
-                .map(Json)
-                .map_err(Into::into)
+            let json = SqlxJson::<T>::decode(value)?;
+            Ok(Json(json.0))
         }
     }
 }

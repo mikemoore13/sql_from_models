@@ -29,8 +29,9 @@ use sqlformat::{FormatOptions, Indent};
 #[cfg(feature = "sqlformat")]
 pub static FORMAT_OPTIONS: FormatOptions = FormatOptions {
     indent: Indent::Spaces(4),
-    uppercase: true,
+    uppercase: Some(true),
     lines_between_queries: 2,
+    ignore_case_convert: None,
 };
 
 pub static MODELS_GENERATE_DOWN: Lazy<bool> = Lazy::new(|| {

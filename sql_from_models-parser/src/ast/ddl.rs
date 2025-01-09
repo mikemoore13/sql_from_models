@@ -156,7 +156,7 @@ pub enum TableConstraint {
     Check(Check),
 }
 /// `[ CONSTRAINT <name> ] { PRIMARY KEY | UNIQUE } (<columns>)`
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Unique {
     pub name: Option<Ident>,
     pub columns: Vec<Ident>,
@@ -164,7 +164,7 @@ pub struct Unique {
     pub is_primary: bool,
 }
 /// `[ CONSTRAINT <name> ] CHECK (<expr>)`
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Check {
     pub name: Option<Ident>,
     pub expr: Box<Expr>,
@@ -175,7 +175,7 @@ pub struct Check {
 /// { [ON DELETE <referential_action>] [ON UPDATE <referential_action>] |
 ///   [ON UPDATE <referential_action>] [ON DELETE <referential_action>]
 /// }`).
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ForeignKey {
     pub name: Option<Ident>,
     pub columns: Vec<Ident>,

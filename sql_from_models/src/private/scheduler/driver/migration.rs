@@ -102,6 +102,6 @@ impl Migration {
     fn formatted_stmt(stmt: &Statement) -> String {
         use sqlformat::QueryParams;
         let stmt = format!("{}", stmt);
-        sqlformat::format(&stmt, &QueryParams::None, FORMAT_OPTIONS)
+        sqlformat::format(&stmt, &QueryParams::None, &FORMAT_OPTIONS)
     }
 }

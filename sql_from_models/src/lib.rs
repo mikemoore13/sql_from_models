@@ -188,8 +188,6 @@ pub mod error;
 mod dialect;
 mod prelude;
 pub mod private;
-#[cfg(tests)]
-mod tests;
 pub mod types;
 
 pub use types::*;

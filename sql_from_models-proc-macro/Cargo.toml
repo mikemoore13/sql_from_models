@@ -1,6 +1,6 @@
 [package]
 name = "sql_from_models-proc-macro"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2018"
 license = "Apache-2.0"
 description = "A helper crate for `models`"
@@ -14,5 +14,5 @@ helpers = []
 [dependencies]
 proc-macro2 = "1.0.28"
 quote = "1.0.9"
-sql_from_models-parser ={version = "0.2.0", path = "../sql_from_models-parser" }
-syn = "1.0.74"
+sql_from_models-parser ={version = "0.2.2", path = "../sql_from_models-parser" }
+syn = "2.0.95"

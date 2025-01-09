@@ -190,13 +190,12 @@ impl Constraints {
     pub fn from_attrs(attrs: &[Attribute]) -> Result<Self> {
         let mut out = vec![];
         for attr in attrs {
-            let tokens = attr.tokens.clone().into();
-            if attr.path.is_ident("foreign_key") {
-                out.push(Constraint::ForeignKey(parse(tokens)?));
-            } else if attr.path.is_ident("unique") {
-                out.push(Constraint::Unique(parse(tokens)?));
-            } else if attr.path.is_ident("primary_key") {
-                out.push(Constraint::Primary(parse(tokens)?));
+            if attr.path().is_ident("foreign_key") {
+                out.push(Constraint::ForeignKey(attr.parse_args()?));
+            } else if attr.path().is_ident("unique") {
+                out.push(Constraint::Unique(attr.parse_args()?));
+            } else if attr.path().is_ident("primary_key") {
+                out.push(Constraint::Primary(attr.parse_args()?));
             }
         }
         Ok(Constraints(out))

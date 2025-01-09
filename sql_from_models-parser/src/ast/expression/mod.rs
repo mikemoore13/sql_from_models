@@ -1,6 +1,6 @@
 mod display;
 use super::*;
-
+use serde::{Serialize, Deserialize};
 /// An SQL expression of any type.
 ///
 /// The parser does not distinguish between expressions of different types
@@ -84,7 +84,7 @@ pub enum Expr {
 /// Note we only recognize a complete single expression as `<condition>`,
 /// not `< 0` nor `1, 2, 3` as allowed in a `<simple when clause>` per
 /// <https://jakewheat.github.io/sql-overview/sql-2011-foundation-grammar.html#simple-when-clause>
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Case {
     pub operand: Option<Box<Expr>>,
     pub conditions: Vec<Expr>,
@@ -93,21 +93,21 @@ pub struct Case {
 }
 
 /// `[ NOT ] IN (val1, val2, ...)`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct InList {
     pub expr: Box<Expr>,
     pub list: Vec<Expr>,
     pub negated: bool,
 }
 /// `[ NOT ] IN (SELECT ...)`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct InSubquery {
     pub expr: Box<Expr>,
     pub subquery: Box<Query>,
     pub negated: bool,
 }
 /// `<expr> [ NOT ] BETWEEN <low> AND <high>`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Between {
     pub expr: Box<Expr>,
     pub negated: bool,
@@ -115,39 +115,39 @@ pub struct Between {
     pub high: Box<Expr>,
 }
 /// Binary operation e.g. `1 + 1` or `foo > bar`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct BinaryOp {
     pub left: Box<Expr>,
     pub op: BinaryOperator,
     pub right: Box<Expr>,
 }
 /// Unary operation e.g. `NOT foo`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct UnaryOp {
     pub op: UnaryOperator,
     pub expr: Box<Expr>,
 }
 /// CAST an expression to a different data type e.g. `CAST(foo AS VARCHAR(123))`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Cast {
     pub expr: Box<Expr>,
     pub data_type: DataType,
 }
 /// TRY_CAST an expression to a different data type e.g. `TRY_CAST(foo AS VARCHAR(123))`
 //  this differs from CAST in the choice of how to implement invalid conversions
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct TryCast {
     pub expr: Box<Expr>,
     pub data_type: DataType,
 }
 /// EXTRACT(DateTimeField FROM <expr>)
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Extract {
     pub field: DateTimeField,
     pub expr: Box<Expr>,
 }
 /// SUBSTRING(<expr> [FROM <expr>] [FOR <expr>])
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Substring {
     pub expr: Box<Expr>,
     pub substring_from: Option<Box<Expr>>,
@@ -156,14 +156,14 @@ pub struct Substring {
 /// TRIM([BOTH | LEADING | TRAILING] <expr> [FROM <expr>])\
 /// Or\
 /// TRIM(<expr>)
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Trim {
     pub expr: Box<Expr>,
     // ([BOTH | LEADING | TRAILING], <expr>)
     pub trim_where: Option<(TrimWhereField, Box<Expr>)>,
 }
 /// `expr COLLATE collation`
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Collate {
     pub expr: Box<Expr>,
     pub collation: ObjectName,
@@ -172,12 +172,12 @@ pub struct Collate {
 /// A constant of form `<data_type> 'value'`.
 /// This can represent ANSI SQL `DATE`, `TIME`, and `TIMESTAMP` literals (such as `DATE '2020-01-01'`),
 /// as well as constants of other types (a non-standard PostgreSQL extension).
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct TypedString {
     pub data_type: DataType,
     pub value: String,
 }
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct MapAccess {
     pub column: Box<Expr>,
     pub key: String,

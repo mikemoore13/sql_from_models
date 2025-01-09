@@ -49,7 +49,7 @@ impl<'table, T: Compare + PartialEq> CRUD<'table, T> {
                 .iter()
                 .all(|t| !c0.are_equal(t) && !c0.are_modified(t))
             {
-                delete.push(c0.clone());
+                delete.push(c0);
             }
         }
 
