@@ -8,18 +8,20 @@ pub struct DefaultExpr {
 
 impl ToTokens for DefaultExpr {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let expr = &self.expr;
+        // If this was parsed as a non-string literal (bool/float/int), just emit it verbatim.
         if !self.is_string {
+            let expr = &self.expr;
             tokens.extend(quote!(#expr));
         } else {
-            let expr = format!("{:?}", self.expr);
-            let len = expr.chars().count();
-            let mut out: String = "'".into();
-            for char in expr.chars().skip(1).take(len - 2) {
-                out.push(char);
-            }
-            out.push('\'');
-            tokens.extend(quote!(#out))
+            // We have a string. Convert it to SQL string syntax: `'some_string'`.
+            // For an empty string (`""`), this becomes `''`.
+            let expr = &self.expr; // e.g. "" or "abc"
+            let snippet = format!("'{}'", expr);
+
+            // Convert that snippet into a token stream directly (not as a Rust string literal).
+            // For expr="", `snippet` becomes "''" (two single quotes).
+            let ts = snippet.parse::<TokenStream2>().expect("Invalid SQL string snippet");
+            tokens.extend(ts);
         }
     }
 }
