@@ -191,22 +191,20 @@ impl Constraints {
     pub fn from_attrs(attrs: &[Attribute]) -> Result<Self> {
         let mut out = vec![];
         for attr in attrs {
+            let meta = &attr.meta;
             if attr.path().is_ident("foreign_key") {
                 // Parse #[foreign_key(...)]
                 out.push(Constraint::ForeignKey(attr.parse_args()?));
             } else if attr.path().is_ident("unique") {
                 // Parse #[unique(...)] or #[unique]
-                let meta = attr.parse_args()?;
                 match meta {
                     syn::Meta::Path(_) => {
                         // #[unique] with no arguments
-                        out.push(Constraint::Unique(Unique {
-                            columns: vec![Ident::new("field_name", attr.span())], // Will be replaced
-                        }));
+                        out.push(Constraint::Unique(Unique::default()));
                     }
                     syn::Meta::List(meta_list) => {
-                        // #[unique(...)] with arguments
-                        let unique: Unique = syn::parse2(meta_list.tokens)?;
+                        // #[unique(...)]
+                        let unique: Unique = syn::parse2(meta_list.tokens.clone())?;
                         out.push(Constraint::Unique(unique));
                     }
                     _ => {
@@ -217,15 +215,15 @@ impl Constraints {
                     }
                 }
             } else if attr.path().is_ident("primary_key") {
-                let meta = attr.parse_args()?;
+                // Handle #[primary_key] or #[primary_key(...)]
                 match meta {
                     syn::Meta::Path(_) => {
                         // #[primary_key] with no arguments
                         out.push(Constraint::Primary(Unique::default()));
                     }
                     syn::Meta::List(meta_list) => {
-                        // #[primary_key(...)]
-                        let unique: Unique = syn::parse2(meta_list.tokens)?;
+                        // #[primary_key(...)] with arguments
+                        let unique: Unique = syn::parse2(meta_list.tokens.clone())?;
                         out.push(Constraint::Primary(unique));
                     }
                     _ => {
@@ -266,20 +264,20 @@ impl Constraint {
 
 fn is_valid(on_delete: &Option<LitStr>) -> Result<()> {
     if let Some(string) = on_delete {
-        if matches!(
+        return if matches!(
             &*string.value(),
             "cascade" | "set null" | "restrict" | "no action"
         ) {
-            return Ok(());
+            Ok(())
         } else {
-            return Err(Error::new(
+            Err(Error::new(
                 string.span(),
                 format!(
                     "invalid referential integrity constraint. Found {:?}, expected one of: {:?}",
                     string.value(),
                     ["restrict", "cascade", "set null", "no action"],
                 ),
-            ));
+            ))
         }
     }
 
