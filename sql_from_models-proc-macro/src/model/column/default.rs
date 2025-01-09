@@ -8,18 +8,15 @@ pub struct DefaultExpr {
 
 impl ToTokens for DefaultExpr {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
+        // If this is a numeric or bool literal, just emit it
         if !self.is_string {
-            // Numeric/bool literal like `42` or `true`: emit verbatim
             let expr = &self.expr;
             tokens.extend(quote!(#expr));
         } else {
-            // String literal like "" or "hello"
-            // Wrap the string in single quotes for SQL
+            // It's a string, so produce a valid SQL string literal.
+            // e.g. if `expr` is "" (empty), you want `''`
             let sql_snippet = format!("'{}'", self.expr);
-            // Make a *Rust* string literal from that snippet
             let lit_str = syn::LitStr::new(&sql_snippet, proc_macro2::Span::call_site());
-
-            // Emit a valid Rust string literal (e.g. "'hello'")
             tokens.extend(quote!(#lit_str));
         }
     }
@@ -32,31 +29,32 @@ impl Parse for DefaultExpr {
         let span = Span::call_site();
         let mut is_string = false;
 
-        // Directly parse one literal (e.g. `0`, `"hello"`, `42.0`, etc.)
+        // Parse one Rust literal: bool, int, float, or string
         let expr = match input.parse::<Lit>() {
             Ok(Lit::Bool(boolean)) => boolean.value().to_string(),
             Ok(Lit::Int(int))     => int.to_string(),
             Ok(Lit::Float(float)) => float.to_string(),
             Ok(Lit::Str(string))  => {
                 is_string = true;
-                string.value()
+                string.value() // e.g. "" or "some text"
             }
-            Ok(lit) => {
+            Ok(_) | Err(_) => {
                 return Err(Error::new(
-                    lit.span(),
-                    "Expected string, boolean, or numeric literal",
-                ));
-            }
-            Err(err) => {
-                return Err(Error::new(
-                    err.span(),
-                    "Expected string, boolean, or numeric literal",
+                    input.span(),
+                    "Expected string, boolean, or numeric literal"
                 ));
             }
         };
 
-        // Optionally verify that the literal is a valid SQL expression:
-        let mut lexer = Tokenizer::new(&GenericDialect {}, &expr);
+        // If the literal is an *empty string* `""`, convert it to `''` for the SQL parser
+        let expr_for_parser = if is_string && expr.is_empty() {
+            "''"
+        } else {
+            &expr
+        };
+
+        // Pass `expr_for_parser` to your SQL parser
+        let mut lexer = Tokenizer::new(&GenericDialect {}, expr_for_parser);
         let tokens = lexer.tokenize().map_err(|err| {
             syn::Error::new(span, format!("Failed to tokenize default expression: {:?}", err))
         })?;
@@ -67,6 +65,7 @@ impl Parse for DefaultExpr {
                 syn::Error::new(span, format!("Failed to parse default expression: {}", err))
             })?;
 
+        // Return the original `expr` (which might be ""), along with `is_string`.
         Ok(DefaultExpr { is_string, expr })
     }
 }
