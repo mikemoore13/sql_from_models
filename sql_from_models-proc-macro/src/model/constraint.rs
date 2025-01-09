@@ -1,3 +1,4 @@
+use syn::spanned::Spanned;
 pub struct Constraints(pub Vec<Constraint>);
 #[derive(Debug)]
 pub enum Constraint {
@@ -191,11 +192,49 @@ impl Constraints {
         let mut out = vec![];
         for attr in attrs {
             if attr.path().is_ident("foreign_key") {
+                // Parse #[foreign_key(...)]
                 out.push(Constraint::ForeignKey(attr.parse_args()?));
             } else if attr.path().is_ident("unique") {
-                out.push(Constraint::Unique(attr.parse_args()?));
+                // Parse #[unique(...)] or #[unique]
+                let meta = attr.parse_args()?;
+                match meta {
+                    syn::Meta::Path(_) => {
+                        // #[unique] with no arguments
+                        out.push(Constraint::Unique(Unique {
+                            columns: vec![Ident::new("field_name", attr.span())], // Will be replaced
+                        }));
+                    }
+                    syn::Meta::List(meta_list) => {
+                        // #[unique(...)] with arguments
+                        let unique: Unique = syn::parse2(meta_list.tokens)?;
+                        out.push(Constraint::Unique(unique));
+                    }
+                    _ => {
+                        return Err(syn::Error::new_spanned(
+                            attr,
+                            "unexpected format for #[unique]",
+                        ));
+                    }
+                }
             } else if attr.path().is_ident("primary_key") {
-                out.push(Constraint::Primary(attr.parse_args()?));
+                let meta = attr.parse_args()?;
+                match meta {
+                    syn::Meta::Path(_) => {
+                        // #[primary_key] with no arguments
+                        out.push(Constraint::Primary(Unique::default()));
+                    }
+                    syn::Meta::List(meta_list) => {
+                        // #[primary_key(...)]
+                        let unique: Unique = syn::parse2(meta_list.tokens)?;
+                        out.push(Constraint::Primary(unique));
+                    }
+                    _ => {
+                        return Err(syn::Error::new_spanned(
+                            attr,
+                            "unexpected format for #[primary_key]",
+                        ));
+                    }
+                }
             }
         }
         Ok(Constraints(out))
