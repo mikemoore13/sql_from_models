@@ -115,19 +115,22 @@ impl NamedConstraint {
 }
 
 impl Parse for Unique {
-    fn parse(input: parse::ParseStream) -> Result<Self> {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         let mut out = Unique::default();
-        let content;
+
+        // If it's empty, that means `#[unique]` with no arguments
         if input.is_empty() {
-        } else {
-            let _paren = parenthesized!(content in input);
-            while !content.is_empty() {
-                out.columns.push(content.parse().unwrap());
-                if !content.is_empty() {
-                    content.parse::<Token![,]>().unwrap();
-                }
+            return Ok(out);
+        }
+
+        // If not empty, parse one or more idents separated by commas.
+        while !input.is_empty() {
+            out.columns.push(input.parse()?);
+            if !input.is_empty() {
+                input.parse::<syn::Token![,]>()?;
             }
         }
+
         Ok(out)
     }
 }
@@ -191,13 +194,12 @@ impl Constraints {
     pub fn from_attrs(attrs: &[Attribute]) -> Result<Self> {
         let mut out = vec![];
         for attr in attrs {
-            let meta = &attr.meta;
             if attr.path().is_ident("foreign_key") {
                 // Parse #[foreign_key(...)]
                 out.push(Constraint::ForeignKey(attr.parse_args()?));
             } else if attr.path().is_ident("unique") {
-                // Parse #[unique(...)] or #[unique]
-                match meta {
+                // Parse #[unique] or #[unique(...)]
+                match &attr.meta {
                     syn::Meta::Path(_) => {
                         // #[unique] with no arguments
                         out.push(Constraint::Unique(Unique::default()));
@@ -216,13 +218,13 @@ impl Constraints {
                 }
             } else if attr.path().is_ident("primary_key") {
                 // Handle #[primary_key] or #[primary_key(...)]
-                match meta {
+                match &attr.meta {
                     syn::Meta::Path(_) => {
                         // #[primary_key] with no arguments
                         out.push(Constraint::Primary(Unique::default()));
                     }
                     syn::Meta::List(meta_list) => {
-                        // #[primary_key(...)] with arguments
+                        // #[primary_key(...)]
                         let unique: Unique = syn::parse2(meta_list.tokens.clone())?;
                         out.push(Constraint::Primary(unique));
                     }
@@ -233,11 +235,14 @@ impl Constraints {
                         ));
                     }
                 }
+            } else {
+                // Unrecognized attribute, skip or handle as needed
             }
         }
         Ok(Constraints(out))
     }
 }
+
 
 impl Constraint {
     pub fn column_names(&self) -> Vec<Ident> {
