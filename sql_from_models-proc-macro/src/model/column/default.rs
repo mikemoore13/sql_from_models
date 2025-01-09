@@ -28,42 +28,44 @@ impl Parse for DefaultExpr {
     fn parse(input: parse::ParseStream) -> Result<Self> {
         use sql_from_models_parser::{dialect::*, parser::Parser, tokenizer::*};
 
-        let content;
-        let _paren = parenthesized!(content in input);
         let span = Span::call_site();
         let mut is_string = false;
-        let expr = match content.parse::<Lit>() {
+
+        // Directly parse one literal (e.g. `0`, `"hello"`, `42.0`, etc.)
+        let expr = match input.parse::<Lit>() {
             Ok(Lit::Bool(boolean)) => boolean.value().to_string(),
-            Ok(Lit::Int(int)) => int.to_string(),
+            Ok(Lit::Int(int))     => int.to_string(),
             Ok(Lit::Float(float)) => float.to_string(),
-            Ok(Lit::Str(string)) => {
+            Ok(Lit::Str(string))  => {
                 is_string = true;
                 string.value()
             }
-            Ok(lit) => Err(Error::new(
-                lit.span(),
-                "Expected string, boolean, or numeric literal",
-            ))?,
-            Err(err) => Err(Error::new(
-                err.span(),
-                "Expected string, boolean, or numeric literal",
-            ))?,
+            Ok(lit) => {
+                return Err(Error::new(
+                    lit.span(),
+                    "Expected string, boolean, or numeric literal",
+                ));
+            }
+            Err(err) => {
+                return Err(Error::new(
+                    err.span(),
+                    "Expected string, boolean, or numeric literal",
+                ));
+            }
         };
 
+        // Optionally verify that the literal is a valid SQL expression:
         let mut lexer = Tokenizer::new(&GenericDialect {}, &expr);
-
         let tokens = lexer.tokenize().map_err(|err| {
-            syn::Error::new(
-                span,
-                format!("Failed to tokenize default expression: {:?}", err.message),
-            )
+            syn::Error::new(span, format!("Failed to tokenize default expression: {:?}", err))
         })?;
 
-        let _ = Parser::new(tokens, &GenericDialect {})
+        Parser::new(tokens, &GenericDialect {})
             .parse_expr()
             .map_err(|err| {
                 syn::Error::new(span, format!("Failed to parse default expression: {}", err))
-            });
+            })?;
+
         Ok(DefaultExpr { is_string, expr })
     }
 }
