@@ -166,8 +166,24 @@ impl<T: IntoSQL> IntoSQL for Option<T> {
     fn into_sql() -> DataType {
         T::into_sql()
     }
-    const IS_NULLABLE: bool = false;
+    const IS_NULLABLE: bool = true;
 }
+
+#[test]
+fn option_types_are_nullable() {
+    std::env::set_var("DATABASE_URL", "postgres://localhost/test");
+
+    let column = crate::private::Column::new(
+        "parent_id",
+        <Option<i64> as IntoSQL>::into_sql(),
+        <Option<i64> as IntoSQL>::IS_NULLABLE,
+    );
+
+    assert!(<Option<i64> as IntoSQL>::IS_NULLABLE);
+    assert!(column.is_nullable());
+    assert_eq!(column.r#type, <i64 as IntoSQL>::into_sql());
+}
+
 impl IntoSQL for bool {
     fn into_sql() -> DataType {
         DataType::Boolean
